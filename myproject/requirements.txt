@@ -2,8 +2,8 @@
 django==3.2
 # uwsgi
 uwsgi==2.0.18
-# mysql
-mysqlclient==1.4.6
+# postgresql
+psycopg2-binary==2.9
 # redis
 django-redis==4.12.1
 redis==3.5.3

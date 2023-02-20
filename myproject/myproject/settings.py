@@ -75,12 +75,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'myproject', # 数据库名
-        'USER':'dbuser', # 你设置的用户名 - 非root用户
-        'PASSWORD':'password', # # 换成你自己密码
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres', # 数据库名
+        'USER':'postgres', # 你设置的用户名 - 非root用户
+        'PASSWORD':'postgres', # # 换成你自己密码
         'HOST': 'db', # 注意：这里使用的是db别名，docker会自动解析成ip
-        'PORT':'3306', # 端口
+        'PORT':'5432', # 端口
     }
 }
 
