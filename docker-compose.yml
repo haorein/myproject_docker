@@ -43,6 +43,8 @@ services:
 
   web:
     build: ./myproject
+    env_file:
+      - ./myproject/.env
     expose:
       - "8000"
     volumes:
