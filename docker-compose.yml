@@ -30,7 +30,7 @@ services:
   db:
     image: mysql
     env_file:
-      - ./myproject/.env # use .env file for environment variables
+      - compose/mysql/.env # use .env file for environment variables
     networks:
       - db_network
     volumes:
