@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  compose-validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 1) 校验 docker-compose.yml 是否可解析
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker version
+        run: |
+          docker --version
+          docker compose version || true
+
+      - name: Compose config (lint)
+        run: docker compose -f docker-compose.yml config
+
+      # 2) 试构建（不推镜像，只确保所有服务能成功 build）
+      #   这会使用 docker-compose.yml 里定义的 build context/Dockerfile
+      - name: Build all services
+        run: docker compose -f docker-compose.yml build --pull
