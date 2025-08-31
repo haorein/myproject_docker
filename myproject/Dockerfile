@@ -2,7 +2,9 @@
 FROM python:3.9
 
 # install netcat
-RUN apt-get update && apt install -y netcat
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends netcat-openbsd \
+ && rm -rf /var/lib/apt/lists/*
 
 # Setting python environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
