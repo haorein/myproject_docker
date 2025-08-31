@@ -87,12 +87,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get("DB_NAME"),  # Database Name
         'USER': os.environ.get("DB_USER"),  # The username you set - non-root user
         'PASSWORD': os.environ.get("DB_PASSWORD"),  # your db user password
         'HOST': 'db',  # Note: 'db' aliases are used here, docker will automatically resolve to ip
-        'PORT': '3306',  # port 3306
+        'PORT': 5432,  # port 5432
     }
 }
 

@@ -28,18 +28,22 @@ services:
     restart: always # this means always restart when the container runs with a error
 
   db:
-    image: mysql
-    env_file:
-      - compose/mysql/.env # use .env file for environment variables
-    networks:
-      - db_network
-    volumes:
-      - db_vol:/var/lib/mysql:rw # Mount database data, readable and writable
-      - ./compose/mysql/conf/my.cnf:/etc/mysql/my.cnf # Mount config file
-      - ./compose/mysql/init:/docker-entrypoint-initdb.d/ # Mount sql initialise script
-    ports:
-      - "3306:3306" # Consistency with config file
+    image: postgres:16
+    container_name: postgres
     restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-mydb}
+      - POSTGRES_USER=${POSTGRES_USER:-myuser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mypass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
 
   web:
     build: ./myproject
