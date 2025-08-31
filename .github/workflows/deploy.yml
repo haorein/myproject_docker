@@ -1,24 +1,59 @@
-name: Deploy
+name: Deploy (SSH + deploy.sh)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-      
+
+    # 避免并发部署踩踏
+    concurrency:
+      group: deploy-myproject
+      cancel-in-progress: true
+
     steps:
-        - name: Checkout code
-          uses: actions/checkout@v2
+      - name: Checkout (for reading repo metadata only)
+        uses: actions/checkout@v4
 
-        - name: SSH Setup
-          uses: webfactory/ssh-agent@v0.5.0
-          with:
-            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: SSH to server and deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          # 如果是 22 以外的端口，额外加： port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: |
+            set -euo pipefail
 
-        - name: Update code on server
-          run: |
-            ssh USER@SERVER_IP_ADDRESS "cd /path/to/project && git pull && sh deploy.sh"
-          env:
-            SSH_AUTH_SOCK: ${{ env.SSH_AUTH_SOCK }}
+            # 你的项目目录（在服务器上已经 git clone 过）
+            APP_DIR="${{ secrets.APP_DIR }}"
+
+            if [ ! -d "$APP_DIR/.git" ]; then
+              echo "APP_DIR ($APP_DIR) 不存在或不是 git 仓库，请先在服务器上 git clone："
+              echo "  sudo mkdir -p $APP_DIR && sudo chown -R $USER:$USER $APP_DIR"
+              echo "  git clone https://github.com/${{ github.repository }}.git $APP_DIR"
+              exit 1
+            fi
+
+            cd "$APP_DIR"
+
+            # 拉取最新代码
+            git fetch --all --prune
+            git checkout main
+            git pull --rebase origin main
+
+            # 确保脚本可执行
+            chmod +x deploy.sh
+
+            # 可选：把 .env 等私密文件放到服务器，不纳入仓库
+            # [如果需要，在这里 echo 或 cp 到 compose 使用的位置]
+
+            # 执行你的部署脚本（建议内部做 docker compose pull/build/up -d）
+            ./deploy.sh
+
+            # 回收悬挂镜像
+            docker image prune -f
